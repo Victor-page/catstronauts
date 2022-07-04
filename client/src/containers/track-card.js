@@ -1,17 +1,44 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { gql, useMutation } from '@apollo/client';
+import { Link } from '@reach/router';
 import { colors, mq } from '../styles';
 import { humanReadableTimeFromSeconds } from '../utils/helpers';
 
-/**
- * Track Card component renders basic info in a card format
- * for each track populating the tracks grid homepage.
- */
-const TrackCard = ({ track }) => {
-  const { title, thumbnail, author, length, modulesCount } = track;
+export const INCREMENT_TRACK_VIEWS = gql`
+  mutation IncrementTrackViewsMutation($incrementTrackViewsId: ID!) {
+    incrementTrackViews(id: $incrementTrackViewsId) {
+      code
+      success
+      message
+      track {
+        id
+        numberOfViews
+      }
+    }
+  }
+`;
+
+const TrackCard = ({
+  track: {
+    title,
+    thumbnail,
+    author: { photo, name },
+    length,
+    modulesCount,
+    id,
+  },
+}) => {
+  const onCompleted = (data) => console.log(data);
+  const variables = { incrementTrackViewsId: id };
+
+  const [incrementTrackViews] = useMutation(INCREMENT_TRACK_VIEWS, {
+    variables,
+    onCompleted,
+  });
 
   return (
-    <CardContainer>
+    <CardContainer to={`/track/${id}`} onClick={incrementTrackViews}>
       <CardContent>
         <CardImageContainer>
           <CardImage src={thumbnail} alt={title} />
@@ -19,12 +46,11 @@ const TrackCard = ({ track }) => {
         <CardBody>
           <CardTitle>{title || ''}</CardTitle>
           <CardFooter>
-            <AuthorImage src={author.photo} />
+            <AuthorImage src={photo} />
             <AuthorAndTrack>
-              <AuthorName>{author.name}</AuthorName>
+              <AuthorName>{name}</AuthorName>
               <TrackLength>
-                {modulesCount} modules -{' '}
-                {humanReadableTimeFromSeconds(length)}
+                {modulesCount} modules - {humanReadableTimeFromSeconds(length)}
               </TrackLength>
             </AuthorAndTrack>
           </CardFooter>
@@ -37,7 +63,7 @@ const TrackCard = ({ track }) => {
 export default TrackCard;
 
 /** Track Card styled components */
-const CardContainer = styled.div({
+const CardContainer = styled(Link)({
   borderRadius: 6,
   color: colors.text,
   backgroundSize: 'cover',

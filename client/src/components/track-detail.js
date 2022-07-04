@@ -74,11 +74,11 @@ const TrackDetail = ({ track }) => {
           <DetailItem>
             <h4>Modules</h4>
             <ul>
-              {modules.map((module) => (
-                <li key={module.title}>
-                  <div>{module.title}</div>
+              {modules.map(({ title, length }) => (
+                <li key={title}>
+                  <div>{title}</div>
                   <ModuleLength>
-                    {humanReadableTimeFromSeconds(module.length)}
+                    {humanReadableTimeFromSeconds(length)}
                   </ModuleLength>
                 </li>
               ))}
